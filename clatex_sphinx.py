@@ -137,18 +137,13 @@ class AlignDirective(Directive):
 
         self.assert_has_content()
         align_node = align(rawsource='\n'.join(self.content), **self.options)
-        # print("DEBUG align_node.attributes=%s" % align_node.attributes)
         self.state.nested_parse(self.content, self.content_offset, align_node)
         for node in align_node:
             node['classes'].extend(directives.class_option(align_type))
-            print("DEBUG 0: %s" % node['classes'])
             if ('center' not in node['classes'] and
                     'flushleft' not in node['classes'] and
                     'flushright' not in node['classes'] ):
                 node['classes'].extend(directives.class_option(align_type))
-                print("DEBUG X:%s" % node)
-            else:
-                print("DEBUG Y:%s" % node)
         return [align_node]
 
 def visit_align_latex(self, node):
