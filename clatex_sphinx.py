@@ -25,6 +25,9 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from docutils import nodes
 
+
+class CLaTeXException(Exception): pass
+
 # environments:
 
 class environment(nodes.Element):
@@ -239,8 +242,188 @@ def visit_endpar_html(self, node):
 def depart_endpar_html(self, node):
     pass
 
-# setup:
+# TheoremDirectiveFactory:
+def TheoremDirectiveFactory(thmname, thmcaption, thmnode, counter=None):
+    """\
+    Function which returns a theorem class.
 
+    Takes four arguments:
+    thmname         - name of the directive
+    thmcaption      - caption name to use
+    thmnode         - node to write to
+    counter         - counter name, if None do not count
+
+    thmname='theorem', thmcaption='Theorem' will produce a directive:
+
+        .. theorem:: theorem_title
+
+            content
+
+    Note that caption is only used in html.  With the above example you should
+    add:
+        \\newtheorem{theorem}{Theorem}
+    to your LaTeX preambule.  The directive will produce:
+
+    in LaTeX:
+        \begin{theorem}[theorem_title]
+            content
+        \end{theorem}
+
+    in HTML:
+    <div class='environment theorem'>
+        <div class='environment_caption theorem_caption'>Theorem</div> <div class='environment_title theorem_title'>title</div>
+        <div class='environment_body theorem_body'>
+            content
+        </div>
+    </div>
+    """
+    class TheoremDirective(Directive):
+
+        # def __init__(self, *args, **kwargs):
+            # self.counter = Counter(counter)
+            # Direcitve.__init__(*args, **kwargs)
+
+        required_arguments = 0
+        optional_arguments = 1
+
+        final_argument_whitespace = True
+        # directive arguments are white space separated.
+
+        option_spec = {
+                    'class': directives.class_option,
+                    'name': directives.unchanged,
+                    }
+
+        has_content = True
+
+        def run(self):
+
+            if counter:
+                c=Counter(counter)
+                c.stepcounter()
+                self.options['counter'] = c.value
+            else:
+                self.options['counter'] = ''
+
+            self.options['thmname'] = thmname
+            self.options['thmcaption'] = thmcaption
+            if self.arguments:
+                self.options['thmtitle'] = self.arguments[0]
+
+            self.assert_has_content()
+            node = thmnode(rawsource='\n'.join(self.content), **self.options)
+            self.state.nested_parse(self.content, self.content_offset, node)
+            self.add_name(node)
+            return [node]
+
+    return TheoremDirective
+
+def visit_theorem_latex(self, node):
+    if 'thmtitle' in node:
+        self.body.append('\n\\begin{%(thmname)s}[%(thmename)s]' % node)
+    else:
+        self.body.append('\n\\begin{%(thmname)s}' % node)
+
+def depart_theorem_latex(self, node):
+    self.body.append('\\end{%(thmname)s}' % node)
+
+def visit_theorem_html(self, node):
+    """\
+    This visit method produces the following html:
+
+    The 'theorem' below will be substituted with node['envname'] and title with
+    node['title'] (environment node's option).  Note that it differe slightly
+    from how LaTeX works.
+
+    For how it it constructed see the __doc__ of TheoremDirectiveFactory
+
+    XXX: you cannot use math in the title"""
+    if 'label' in node:
+        ids = [ node['label'] ]
+    else:
+        ids = []
+    self.body.append(self.starttag(node, 'div', CLASS='theoremenv %(thmname)s' % node, IDS = ids))
+    self.body.append('<div class="theoremenv_caption %(thmname)s_caption">%(thmcaption)s<span class="theoremenv_counter %(thmname)s_counter">%(counter)s</span>' % node)
+    if 'thmtitle' in node:
+        self.body.append('<span class="theoremenv_title %(thmname)s_title">%(thmtitle)s</span>' % node)
+    self.body.append('</div>')
+    self.body.append('<div class="theoremenv_body %(thmname)s_body">' % node)
+    self.set_first_last(node)
+
+def depart_theorem_html(self, node):
+    self.body.append('</div>')
+    self.body.append('</div>')
+
+class Counter(object):
+    """\
+    Base class for counters.  There is only one instance for a given name.
+
+        >>> c=Counter('counter')
+        >>> d=Counter('counter')
+        >>> c id d
+        True
+
+    This is done using __new__ method.
+    """
+
+    registered_counters = {}
+
+    def __new__(cls, name, value=0, within=None):
+        if name in cls.registered_counters:
+            return cls.registered_counters[name]
+        else:
+            return super(Counter, cls).__new__(cls, name, value, within)
+
+    def __init__(self, name, value=0, within=None):
+        if hasattr(self, 'name'):
+            # do not __init__ once again
+            return
+        self.name = name
+        self.value = value
+
+        self.register()
+
+    def register(self):
+        Counter.registered_counters[self.name] = self
+
+    def stepcounter(self):
+        self.value += 1
+
+    def addtocounter(self, value=1):
+        self.value += value
+
+    def setcounter(self, value):
+        self.value = value
+
+    def __str__(self):
+        return str(self.value)
+
+    def __unicode__(self):
+        return str(self.value)
+
+# newtheorem:
+def newtheorem(app, thmname, thmcaption, counter=None):
+    """\
+    Add new theorem.  It is thought as an analog of:
+    \\newtheorem{theorem_name}{caption}
+
+    counter is an instance of Counter.  If None (the default) the
+    constructed theorem will not be counted.
+    """
+
+    nodename = 'thmnode_%s' % thmname
+    thmnode = type(nodename, (nodes.Element,), {})
+    if nodename in globals():
+        raise CLaTeXException('CLaTeX Error: "%s" already defined in "%s" (do you import "%s" twice? check conf.extensions)' % (nodename, __name__, __name__))
+    globals()[nodename]=thmnode # important for pickling
+    app.add_node(thmnode,
+                    html = (visit_theorem_html, depart_theorem_html),
+                    latex = (visit_theorem_latex, depart_theorem_latex),
+                )
+    TheoremDirective = TheoremDirectiveFactory(thmname, thmcaption, thmnode, counter)
+    app.add_directive(thmname, TheoremDirective)
+
+# setup:
 def setup(app):
 
     # app.add_directive('begin', EnvironmentDirective)
@@ -273,3 +456,17 @@ def setup(app):
             html = (visit_endpar_html, depart_endpar_html),
             latex = (visit_endpar_latex, depart_endpar_latex)
             )
+
+    # Add standard theorems:
+    newtheorem(app, 'theorem', 'Theorem', 'theorem')
+    newtheorem(app, 'proposition', 'Proposition', 'theorem')
+    newtheorem(app, 'definition', 'Definition', 'theorem')
+    newtheorem(app, 'lemma', 'Lemma', 'theorem')
+    newtheorem(app, 'example', 'Example', 'theorem')
+    newtheorem(app, 'exercise', 'Exercise', 'exercise')
+
+# test if there is no global name which starts with 'thmnode_', 
+# these names are reserved for thmnodes (newtheorem()).
+for name in globals().copy():
+    if name.startswith('thmnode_'):
+        raise CLaTeXException('CLaTeX Internal Error: "%s" in globals()' % name)
