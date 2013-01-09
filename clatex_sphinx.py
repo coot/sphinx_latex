@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+"""\
 Adds environment directives:
 
 .. environment:: Theorem
@@ -25,11 +25,12 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from docutils import nodes
 
+__all__ = [ 'newtheorem', 'EnvironmentDirective', 'AlignDirective', 'TextColorDirective', 'TheoremDirectvieFactory']
+
 
 class CLaTeXException(Exception): pass
 
-# environments:
-
+# EnvironmentDirective:
 class environment(nodes.Element):
     pass
 
@@ -75,19 +76,21 @@ def depart_environment_latex(self, node):
     self.body.append('\\end{%s}' % node['envname'])
 
 def visit_environment_html(self, node):
-    """ This visit method produces the following html:
+    """\
+    This visit method produces the following html:
 
     The 'theorem' below will be substituted with node['envname'] and title with
-    node['title'] (environment node's option),
+    node['title'] (environment node's option).  Note that it differe slightly
+    from how LaTeX works.
 
     <div class='environment theorem'>
-        <div class='environment_title theorem_title'>Theorem: title </div>
+        <div class='environment_title theorem_title'>title</div>
         <div class='environment_body theorem_body'>
           ...
         </div>
     </div>
 
-    XXX: title doesn't allow for using any math"""
+    XXX: title does not allow math roles"""
     if 'label' in node:
         ids = [ node['label'] ]
     else:
@@ -108,7 +111,7 @@ def depart_environment_html(self, node):
     self.body.append('</div>')
     self.body.append('</div>')
 
-# align:
+# AlignDirective:
 class align(nodes.Element):
     pass
 
@@ -163,8 +166,7 @@ def depart_align_html(self, node):
     # XXX: to be implemented.
     pass
 
-# textcolor:
-
+# TextColorDirective:
 class TextColorDirective(Directive):
 
     required_arguments = 1
@@ -185,14 +187,15 @@ class textcolor(nodes.Element):
     pass
 
 def textcolor_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
-    """ This role is interpreted in the following way:
-        :color:`<color_spec> text `
-        where color spec is in HTML model, e.g. #FFFFFF, ...
-        in latex:
-        \\textcolor[HTML]{color_spec}{text}
-        (the leading # is removed from color_spec)
-        in html
-        <font color="color_spec">text</font>
+    """\
+    This role is interpreted in the following way:
+    :color:`<color_spec> text `
+    where color spec is in HTML model, e.g. #FFFFFF, ...
+    in latex:
+    \\textcolor[HTML]{color_spec}{text}
+    (the leading # is removed from color_spec)
+    in html
+    <font color="color_spec">text</font>
     """
     color_spec = text[1:text.index('>')]
     text = (text[text.index('>')+1:]).strip()
@@ -215,8 +218,7 @@ def visit_textcolor_latex(self, node):
 def depart_textcolor_latex(self, node):
     self.body.append('}')
 
-# endpar:
-
+# EndParDirective:
 class endpar(nodes.Element):
     pass
 
