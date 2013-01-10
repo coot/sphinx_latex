@@ -65,10 +65,10 @@ class EnvironmentDirective(Directive):
 def visit_environment_latex(self, node):
     if 'latex_title' in node:
         # XXX: node['title'] should be parssed (for example there might be math inside)
-        self.body.append('\n\\begin{%s}[%s]' % (node['envname'], node['latex_title']))
+        self.body.append('\n\\begin{%s}[{%s}]' % (node['envname'], node['latex_title']))
     elif 'title' in node:
         # XXX: node['title'] should be parssed (for example there might be math inside)
-        self.body.append('\n\\begin{%s}[%s]' % (node['envname'], node['title']))
+        self.body.append('\n\\begin{%s}[{%s}]' % (node['envname'], node['title']))
     else:
         self.body.append('\n\\begin{%s}' % (node['envname']))
 
@@ -267,7 +267,7 @@ def TheoremDirectiveFactory(thmname, thmcaption, thmnode, counter=None):
     to your LaTeX preambule.  The directive will produce:
 
     in LaTeX:
-        \begin{theorem}[theorem_title]
+        \begin{theorem}[{theorem_title}] %  theorem_title will be put inside {}.
             content
         \end{theorem}
 
