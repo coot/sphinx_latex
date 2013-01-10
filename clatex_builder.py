@@ -4,9 +4,9 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     The difference from LaTeXBuilder are:
-        not much except:
+        not many except:
         - CustomLaTeXWriter is imported from clatex_writer,
-        - clatex_sphinx extension is builded in.
+        - clatex_sphinx extension is build in.
 
     LaTeX builder.
 
@@ -200,8 +200,8 @@ def setup(app):
     app.add_config_value('clatex_end_doc', '', 'env')
     app.add_config_value('clatex_highlighter', True, 'env')
     app.add_config_value('clatex_hyperref_args', '', 'env')
-    app.add_config_value('clatex_makeidx', False, 'env') 
-        # clatex_makeidx can be a boolean or a string ('\usepackage{makeidx}\n\makeindex')
+    app.add_config_value('clatex_makeidx', False, 'env')
+    # clatex_makeidx can be a boolean or a string ('\usepackage{makeidx}\n\makeindex')
 
     app.add_builder(LaTeXBuilder)
 
