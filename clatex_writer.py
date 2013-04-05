@@ -64,6 +64,13 @@ class CustomLaTeXTranslator(sphinx.writers.latex.LaTeXTranslator, nodes.NodeVisi
         'documentclass':   '\documentclass{book}',
         }
 
+l   # todo: I should find a real solution
+    def visit_transition(self, node):
+        try:
+            self.body.append(self.elements['transition'])
+        except Exception, e:
+            print('ERROR: %s' % e)
+
     def __init__(self, document, builder):
 
         # super(type(self), self).__init__(document, builder)
