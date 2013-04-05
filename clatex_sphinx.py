@@ -281,9 +281,9 @@ def TheoremDirectiveFactory(thmname, thmcaption, thmnode, counter=None):
     """
     class TheoremDirective(Directive):
 
-        # def __init__(self, *args, **kwargs):
-            # self.counter = Counter(counter)
-            # Direcitve.__init__(*args, **kwargs)
+        def __init__(self, *args, **kwargs):
+            self.counter = Counter(counter)
+            super(self.__class__, self).__init__(*args, **kwargs)
 
         required_arguments = 0
         optional_arguments = 1
@@ -301,9 +301,8 @@ def TheoremDirectiveFactory(thmname, thmcaption, thmnode, counter=None):
         def run(self):
 
             if counter:
-                c=Counter(counter)
-                c.stepcounter()
-                self.options['counter'] = c.value
+                self.counter.stepcounter()
+                self.options['counter'] = self.counter.value
             else:
                 self.options['counter'] = ''
 
@@ -322,7 +321,7 @@ def TheoremDirectiveFactory(thmname, thmcaption, thmnode, counter=None):
 
 def visit_theorem_latex(self, node):
     if 'thmtitle' in node:
-        self.body.append('\n\\begin{%(thmname)s}[%(thmename)s]' % node)
+        self.body.append('\n\\begin{%(thmname)s}[{%(thmtitle)s}]' % node)
     else:
         self.body.append('\n\\begin{%(thmname)s}' % node)
 
@@ -372,13 +371,17 @@ class Counter(object):
 
     def __new__(cls, name, value=0, within=None):
         if name in cls.registered_counters:
-            return cls.registered_counters[name]
+            instance = cls.registered_counters[name]
+            instance._init = False
+            return instance
         else:
-            return super(Counter, cls).__new__(cls, name, value, within)
+            instance = super(Counter, cls).__new__(cls, name, value, within)
+            instance._init = True
+            return instance
 
     def __init__(self, name, value=0, within=None):
-        if hasattr(self, 'name'):
-            # do not __init__ once again
+        if not self._init:
+            # __init__ once
             return
         self.name = name
         self.value = value
@@ -403,6 +406,9 @@ class Counter(object):
     def __unicode__(self):
         return str(self.value)
 
+class TheoremNode(nodes.Element):
+    pass
+
 # newtheorem:
 def newtheorem(app, thmname, thmcaption, counter=None):
     """\
@@ -414,9 +420,7 @@ def newtheorem(app, thmname, thmcaption, counter=None):
     """
 
     nodename = 'thmnode_%s' % thmname
-    thmnode = type(nodename, (nodes.Element,), {})
-    if nodename in globals():
-        raise CLaTeXException('CLaTeX Error: "%s" already defined in "%s" (do you import "%s" twice? check conf.extensions)' % (nodename, __name__, __name__))
+    thmnode = type(nodename, (TheoremNode,), {})
     globals()[nodename]=thmnode # important for pickling
     app.add_node(thmnode,
                     html = (visit_theorem_html, depart_theorem_html),
