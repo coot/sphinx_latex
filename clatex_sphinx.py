@@ -189,7 +189,7 @@ class textcolor(nodes.Element):
 def textcolor_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     """\
     This role is interpreted in the following way:
-    :color:`<color_spec> text `
+    :textcolor:`<color_spec> text `
     where color spec is in HTML model, e.g. #FFFFFF, ...
     in latex:
     \\textcolor[HTML]{color_spec}{text}
