@@ -54,15 +54,18 @@ class CustomLaTeXWriter(sphinx.writers.latex.LaTeXWriter):
 class CustomLaTeXTranslator(sphinx.writers.latex.LaTeXTranslator, nodes.NodeVisitor, object):
 
     default_elements = {
-        'preamble':        '',
-        'begin_doc':       '',
-        'end_doc':         '',
-        'longtable':       '',
-        'tabulary':        '\\usepackage{tabulary}',
-        'multirow':        '\\usepackage{multirow}',
-        'hyperref_args':   '',
-        'makeidx':         '',
-        'documentclass':   '\documentclass{book}',
+        'preamble': '',
+        'begin_doc': '',
+        'end_doc': '',
+        'longtable': '',
+        'tabulary': '\\usepackage{tabulary}',
+        'multirow': '\\usepackage{multirow}',
+        'hyperref_args': '',
+        'makeidx': '',
+        'documentclass': '\documentclass{book}',
+        'shorthandoff': '',
+        'transition': '\n\n\\bigskip\\hrule{}\\bigskip\n\n',
+        'figure_align': 'htbp',
         }
 
     # todo: I should find a real solution
