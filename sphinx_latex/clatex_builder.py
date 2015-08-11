@@ -38,7 +38,8 @@ from sphinx.ext.mathbase import eq_role
 from sphinx.ext.mathbase import MathDirective
 from sphinx.ext.mathbase import number_equations
 
-import clatex_sphinx
+from .clatex_sphinx import setup as clatex_setup
+
 
 class LaTeXBuilder(Builder):
     """
@@ -192,6 +193,7 @@ class LaTeXBuilder(Builder):
                          path.join(self.outdir, filename))
         self.info('done')
 
+
 def setup(app):
     app.add_config_value('clatex_documentclass', '\\documentclass{book}\n', 'env')
     app.add_config_value('clatex_preamble', '', 'env')
@@ -210,4 +212,4 @@ def setup(app):
     app.add_directive('math', MathDirective)
     app.connect('doctree-resolved', number_equations)
 
-    clatex_sphinx.setup(app)
+    clatex_setup(app)
