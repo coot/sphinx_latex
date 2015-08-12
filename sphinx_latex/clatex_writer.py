@@ -97,7 +97,7 @@ class CustomLaTeXTranslator(sphinx.writers.latex.LaTeXTranslator, nodes.NodeVisi
         self.elements = self.default_elements.copy()
         if type(builder.config.clatex_makeidx) == bool:
             if builder.config.clatex_makeidx:
-                makeidx = '\usepackage{makeidx}\n\makeindex'
+                makeidx = '\\usepackage{makeidx}\n\\makeindex'
             else:
                 makeidx = ''
         else:
