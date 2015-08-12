@@ -155,6 +155,7 @@ class CustomLaTeXTranslator(sphinx.writers.latex.LaTeXTranslator, nodes.NodeVisi
         self.remember_multirow = {}
 
     def astext(self):
+        HEADER = self.builder.app.config.clatex_header
         if self.builder.config.clatex_highlighter:
             return (HEADER % self.elements +
                     self.highlighter.get_stylesheet() +
