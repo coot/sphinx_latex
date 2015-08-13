@@ -10,5 +10,5 @@ setup(
     author='Marcin Szamotulski',
     author_email='coot@riseup.net',
     url='https://www.github.com/coot/sphinx_latex',
-    packages=['sphinx_latex'],
+    packages=['sphinx_clatex'],
 )
