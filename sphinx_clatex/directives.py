@@ -25,7 +25,7 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from docutils import nodes
 
-__all__ = [ 'newtheorem', 'EnvironmentDirective', 'AlignDirective', 'TextColorDirective', 'TheoremDirectvieFactory']
+__all__ = [ 'newtheorem', 'EnvironmentDirective', 'AlignDirective', 'TextColorDirective', 'TheoremDirectiveFactory']
 
 
 class CLaTeXException(Exception): pass

@@ -32,14 +32,14 @@ from sphinx.environment import NoUri
 from sphinx.util.nodes import inline_all_toctrees
 from sphinx.util.osutil import SEP, copyfile
 from sphinx.util.console import bold, darkgreen
-from clatex_writer import (CustomLaTeXWriter as LaTeXWriter,
-                           HEADER)
 from sphinx.ext.mathbase import math_role
 from sphinx.ext.mathbase import eq_role
 from sphinx.ext.mathbase import MathDirective
 from sphinx.ext.mathbase import number_equations
 
-from .clatex_sphinx import setup as clatex_setup
+from .writer import (CustomLaTeXWriter as LaTeXWriter,
+                           HEADER)
+from .directives import setup as clatex_setup
 
 
 class LaTeXBuilder(Builder):
@@ -205,6 +205,12 @@ def setup(app):
     app.add_config_value('clatex_hyperref_args', '', 'env')
     app.add_config_value('clatex_makeidx', False, 'env')
     app.add_config_value('clatex_header', HEADER, 'env')
+    app.add_config_value(
+        'clatex_sectionnames',
+        ["part", "chapter", "section", "subsection", "subsubsection",
+         "paragraph", "subparagraph"],
+        'env',
+    )
     # clatex_makeidx can be a boolean or a string ('\usepackage{makeidx}\n\makeindex')
 
     app.add_builder(LaTeXBuilder)
