@@ -152,6 +152,7 @@ class CustomLaTeXTranslator(sphinx.writers.latex.LaTeXTranslator, nodes.NodeVisi
         self.previous_spanning_row = 0
         self.previous_spanning_column = 0
         self.remember_multirow = {}
+        self.remember_multirowcol = {}
 
     def astext(self):
         HEADER = self.builder.app.config.clatex_header

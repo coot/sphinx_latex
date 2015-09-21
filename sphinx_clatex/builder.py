@@ -50,6 +50,7 @@ class LaTeXBuilder(Builder):
     format = 'latex'
     supported_image_types = ['application/pdf', 'image/png',
                              'image/gif', 'image/jpeg']
+    WriterClass = LaTeXWriter
 
     def init(self):
         self.docnames = []
@@ -89,7 +90,7 @@ class LaTeXBuilder(Builder):
             self.titles.append((docname, entry[2]))
 
     def write(self, *ignored):
-        docwriter = LaTeXWriter(self)
+        docwriter = self.WriterClass(self)
         docsettings = OptionParser(
             defaults=self.env.settings,
             components=(docwriter,)).get_default_values()
@@ -195,7 +196,7 @@ class LaTeXBuilder(Builder):
         self.info('done')
 
 
-def setup(app):
+def setup(app, add_builder=True):
     app.add_config_value('clatex_documentclass', '\\documentclass{book}\n', 'env')
     app.add_config_value('clatex_preamble', '', 'env')
     app.add_config_value('clatex_use_chapters', True, 'env')
@@ -213,7 +214,8 @@ def setup(app):
     )
     # clatex_makeidx can be a boolean or a string ('\usepackage{makeidx}\n\makeindex')
 
-    app.add_builder(LaTeXBuilder)
+    if add_builder:
+        app.add_builder(LaTeXBuilder)
 
     app.add_role('math', math_role)
     app.add_role('eq', eq_role)
